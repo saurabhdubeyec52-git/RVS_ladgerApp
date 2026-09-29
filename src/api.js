@@ -22,6 +22,9 @@ async function unwrap(promise) {
 }
 
 export const api = {
+  app: {
+    version: () => unwrap(raw.app.version())
+  },
   auth: {
     status: () => unwrap(raw.auth.status()),
     createAdmin: (u, p) => unwrap(raw.auth.createAdmin(u, p)),

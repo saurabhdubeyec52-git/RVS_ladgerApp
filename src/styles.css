@@ -156,6 +156,13 @@ body {
   margin-bottom: 8px;
 }
 
+.app-version {
+  margin: 2px 12px 0;
+  color: #8792a7;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 /* Language toggle (segmented) */
 .lang-toggle {
   display: flex;

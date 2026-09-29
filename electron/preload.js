@@ -3,6 +3,9 @@ import { contextBridge, ipcRenderer } from 'electron'
 const invoke = (channel, payload) => ipcRenderer.invoke(channel, payload)
 
 contextBridge.exposeInMainWorld('api', {
+  app: {
+    version: () => invoke('app:version')
+  },
   auth: {
     status: () => invoke('auth:status'),
     createAdmin: (username, password) => invoke('auth:createAdmin', { username, password }),

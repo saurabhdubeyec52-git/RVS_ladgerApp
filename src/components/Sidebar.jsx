@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useTheme } from '../context/ThemeContext.jsx'
 import { useLang } from '../i18n.jsx'
+import { api } from '../api.js'
 import ActionMenu from './ActionMenu.jsx'
 import logo from '../assets/logo.png'
 
@@ -28,6 +30,15 @@ export default function Sidebar({ overdueCount }) {
   const { user, logout } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
   const { t, toggle: toggleLang } = useLang()
+  const [appVersion, setAppVersion] = useState('')
+
+  useEffect(() => {
+    let active = true
+    api.app.version()
+      .then((version) => { if (active) setAppVersion(version) })
+      .catch(() => { if (active) setAppVersion('—') })
+    return () => { active = false }
+  }, [])
 
   const link = ({ isActive }) => 'nav-link' + (isActive ? ' active' : '')
 
@@ -80,6 +91,11 @@ export default function Sidebar({ overdueCount }) {
           triggerLabel={t('settings')}
           align="left"
         />
+        {appVersion && (
+          <div className="app-version" aria-label={t('appVersion', { version: appVersion })}>
+            {t('appVersion', { version: appVersion })}
+          </div>
+        )}
       </div>
     </aside>
   )

@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import * as authRepo from '../repositories/authRepo.js'
 import * as userRepo from '../repositories/userRepo.js'
 import * as transactionRepo from '../repositories/transactionRepo.js'
@@ -11,6 +11,7 @@ import { runOverdueCheck, promoteOverdue } from '../services/overdueService.js'
 // Read-only channels never mutate data, so they must NOT broadcast a change
 // (that would loop: reload -> read -> broadcast -> reload ...).
 const READ_ONLY = new Set([
+  'app:version',
   'auth:status',
   'auth:createAdmin',
   'auth:login',
@@ -53,6 +54,8 @@ export function registerIpc(getMainWindow) {
   }
 
   // --- Licensing / app expiry ---
+  handle('app:version', () => app.getVersion())
+
   // Authoritative expiry check lives in the main process so it can't be bypassed
   // by tampering with the renderer.
   handle('license:status', () => licenseRepo.getStatus())
