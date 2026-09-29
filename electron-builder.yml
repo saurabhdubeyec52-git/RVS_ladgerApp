@@ -1,0 +1,54 @@
+appId: com.rvs.ledger
+productName: RVS_Ledger
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+# Force a valid ad-hoc signature on macOS (electron-builder skips signing with
+# no cert, which leaves the app "damaged"). See scripts/afterPack.cjs.
+afterPack: scripts/afterPack.cjs
+mac:
+  category: public.app-category.finance
+  icon: build/icon.icns
+  # No Apple Developer cert locally. Do NOT set `identity: null` — that disables
+  # signing entirely, which on Apple Silicon leaves the bundle with a stale
+  # Electron stub signature and macOS reports it as "damaged". Leaving identity
+  # unset lets electron-builder ad-hoc sign the arm64 app so it opens (it will
+  # still be flagged "unidentified developer" → right-click → Open, or run
+  # `xattr -dr com.apple.quarantine "RVS Ledger.app"`).
+  # Applies to the portable zip target (built via `electron-builder --mac zip`);
+  # the dmg installer overrides its own name below.
+  artifactName: RVS-Ledger-${version}-${arch}-portable.${ext}
+  target:
+    - target: dmg
+      arch:
+        - arm64
+dmg:
+  artifactName: RVS-Ledger-${version}-${arch}.${ext}
+win:
+  icon: build/icon.png
+  # Applies to the portable zip target (built via `electron-builder --win zip`);
+  # the nsis installer overrides its own name.
+  artifactName: RVS-Ledger-${version}-${arch}-portable.${ext}
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  # Per-arch name: each arch is built separately (the native better-sqlite3
+  # binary differs per arch and cannot be cross-rebuilt from macOS).
+  artifactName: RVS-Ledger-Setup-${version}-${arch}.${ext}
+linux:
+  icon: build/icon.png
+  target:
+    - AppImage

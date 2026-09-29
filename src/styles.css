@@ -1,0 +1,1859 @@
+:root {
+  --bg: #f4f6fb;
+  --panel: #ffffff;
+  --ink: #1f2733;
+  --muted: #6b7686;
+  --line: #e4e8f0;
+  --primary: #3056d3;
+  --primary-ink: #ffffff;
+  --danger: #d33a3a;
+  --ok: #1f9d55;
+  --warn: #c97a12;
+  --shadow: 0 1px 3px rgba(20, 30, 60, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 14px;
+}
+
+/* ---------- Layout ---------- */
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  background: #131a2b;
+  color: #cfd6e4;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  padding: 6px 8px 18px;
+}
+
+/* Logo + app name lockup (sidebar + login) */
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-brand .brand-logo {
+  width: 30px;
+  height: 30px;
+}
+
+/* Settings menu button at the bottom of the sidebar */
+.settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  color: #cfd6e4;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.settings-btn svg {
+  display: block;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #cfd6e4;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.badge {
+  background: var(--danger);
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+}
+
+.who {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* Language toggle (segmented) */
+.lang-toggle {
+  display: flex;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 12px;
+}
+
+.lang-opt {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #cfd6e4;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lang-opt.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Toggle on the login screen */
+.auth-lang {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.auth-lang .lang-toggle {
+  background: #eef1f8;
+}
+
+.auth-lang .lang-opt {
+  color: var(--muted);
+}
+
+.auth-lang .lang-opt.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.content-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 18px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: #eef2ff;
+  border-color: #cbd4e6;
+  color: var(--primary);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: #fff;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+/* Left (back + title) and right (actions + forward) groups of a page header */
+.page-header-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---------- Pages ---------- */
+.page {
+  padding: 16px 28px 24px;
+  max-width: 1500px;
+}
+
+/* Center the customer form both vertically and horizontally in the content. */
+.form-page {
+  max-width: none;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-page .form-card {
+  width: 100%;
+}
+
+/* List pages: the table fills the remaining height (scrolls internally with a
+   pinned header) so there's no empty space below it. */
+.list-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.list-page .table-wrap {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+/* Card list (Notifications): only the cards scroll; header/intro/filters stay. */
+.list-page .notif-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 10px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-left: 8px;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.btn:first-child {
+  margin-left: 0;
+}
+
+.form-actions .btn {
+  margin-left: 0;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+  box-shadow: 0 4px 12px rgba(48, 86, 211, 0.25);
+}
+
+.btn-primary:hover {
+  background: #2848b8;
+  box-shadow: 0 6px 16px rgba(48, 86, 211, 0.32);
+}
+
+.btn-ghost {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.btn-ghost:hover {
+  background: #f5f7fc;
+  border-color: #cbd4e6;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(211, 58, 58, 0.22);
+}
+
+.btn-danger:hover {
+  background: #bb2f2f;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* Re-check / sync button */
+.btn-recheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #eef2ff;
+  color: var(--primary);
+  border-color: #d7e0ff;
+}
+
+.btn-recheck:hover:not(:disabled) {
+  background: #e2e9ff;
+  border-color: #c3d1ff;
+}
+
+.recheck-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.recheck-icon.spin {
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin-right: 12px;
+  text-decoration: none;
+}
+
+.link.danger {
+  color: var(--danger);
+}
+
+/* ---------- Stat cards ---------- */
+.stats-grid {
+  /* Equal-width columns that fill the full row. All five stats sit on one line
+     on a wide window; the breakpoints below drop to fewer columns when narrow,
+     so a single card never stretches across an otherwise-empty row. */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.stat-card {
+  position: relative;
+  /* Grid items default to min-width:auto, which lets the nowrap value and the
+     long "Pending…" label push a column past its 1fr share and overflow the
+     page (horizontal scroll). min-width:0 lets the column shrink so the label
+     wraps within its track instead. */
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px 8px 12px;
+  box-shadow: 0 1px 2px rgba(20, 30, 60, 0.06);
+  overflow: hidden;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(20, 30, 60, 0.12);
+}
+
+/* Clickable dashboard cards drill into their detailed list. */
+.stat-clickable {
+  cursor: pointer;
+}
+
+.stat-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* accent bar on the left edge */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+}
+
+.stat-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: var(--accent-soft);
+}
+
+.stat-body {
+  min-width: 0;
+  margin-top: 0;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* The outstanding tile keeps the same surface as the rest; only its value is
+   tinted with the accent so the headline figure still stands out. */
+.stat-wide .stat-value {
+  color: var(--accent);
+}
+
+/* Fewer columns on narrower windows so cards stay readable and evenly sized
+   (no orphan card stretching across a half-empty row). */
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* accent palette */
+.accent-blue {
+  --accent: #3056d3;
+  --accent-soft: #e7edfd;
+}
+.accent-violet {
+  --accent: #7a4fd6;
+  --accent-soft: #efe8fb;
+}
+.accent-red {
+  --accent: #e0413f;
+  --accent-soft: #fde6e6;
+}
+.accent-amber {
+  --accent: #d98613;
+  --accent-soft: #fcefd9;
+}
+.accent-green {
+  --accent: #1f9d55;
+  --accent-soft: #e1f5ea;
+}
+.accent-indigo {
+  --accent: #4338ca;
+  --accent-soft: #e8e7fb;
+}
+
+/* ---------- Tables ---------- */
+/* Scroll container: horizontal when columns overflow, vertical when rows do.
+   The header stays pinned while scrolling vertically. */
+.table-wrap {
+  overflow: auto;
+  max-height: 72vh;
+  /* Fill the available width (no empty space beside the table); scroll
+     horizontally only when the columns genuinely overflow. */
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Inside a scroll wrapper the wrapper owns the border/radius. The table fills
+   the (shrink-wrapped) wrapper, and cells stay on one line for a clean tabular
+   look — wide content scrolls horizontally instead of stretching. */
+.table-wrap > .table {
+  border: 0;
+  border-radius: 0;
+  width: 100%;
+}
+
+/* Headers stay on one line; data cells wrap (long emails/addresses break) so
+   every column fits within the width instead of forcing horizontal scroll. */
+.table-wrap > .table th {
+  white-space: nowrap;
+}
+
+.table-wrap > .table td {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.table-wrap > .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.table th {
+  background: #fafbfe;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.row-click {
+  cursor: pointer;
+}
+
+.row-click:hover {
+  background: #f7f9ff;
+}
+
+/* ---------- Serial number column ---------- */
+.col-sno {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ---------- Action menu ---------- */
+.col-action {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.action-trigger {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.action-trigger:hover {
+  background: #eef2ff;
+  border-color: var(--line);
+  color: var(--text, #1f2937);
+}
+
+.action-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 160px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.action-item {
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text, #1f2937);
+}
+
+.action-item:hover {
+  background: #f1f5ff;
+}
+
+.action-item.danger {
+  color: var(--danger, #dc2626);
+}
+
+.action-item.danger:hover {
+  background: #fef2f2;
+}
+
+/* ---------- Pills & money ---------- */
+.pill {
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pill.ok {
+  background: #e3f5ea;
+  color: var(--ok);
+}
+
+.pill.warn {
+  background: #fbeeda;
+  color: var(--warn);
+}
+
+.pill.danger {
+  background: #fbe0e0;
+  color: var(--danger);
+}
+
+.money {
+  font-weight: 700;
+}
+
+.money.owe {
+  color: var(--danger);
+}
+
+.money.advance {
+  color: var(--ok);
+}
+
+.money.clear {
+  color: var(--muted);
+}
+
+/* ---------- Inputs ---------- */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fdfdff;
+  color: var(--ink);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #aab2c0;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #c9d2e3;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+}
+
+/* Input with a fixed prefix addon (e.g. +91 on phone) */
+.input-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  background: #f1f4fb;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.input-group input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.search {
+  max-width: 360px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Table toolbar (search + filters + sort) ---------- */
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.table-toolbar .search {
+  margin-bottom: 0;
+  flex: 1 1 240px;
+}
+
+.filter-select {
+  width: auto;
+  min-width: 150px;
+  flex: 0 0 auto;
+}
+
+/* Sortable column headers */
+.sort-header {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sort-header:hover {
+  color: var(--ink);
+}
+
+.sort-ind {
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--line);
+}
+
+.sort-ind.active {
+  color: var(--primary);
+}
+
+/* ---------- Forms ---------- */
+/* Center the customer form on the page */
+.form-page .page-header {
+  justify-content: center;
+}
+
+.form-page .form-card {
+  margin: 0 auto;
+}
+
+.form-card,
+.auth-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 30px 32px;
+  max-width: 560px;
+  box-shadow: 0 10px 30px rgba(20, 30, 60, 0.07), 0 1px 2px rgba(20, 30, 60, 0.05);
+}
+
+.form-card label,
+.auth-card label {
+  display: block;
+  margin: 18px 0 7px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #3a4456;
+  letter-spacing: 0.01em;
+}
+
+.form-card form > label:first-of-type,
+.auth-card form > label:first-of-type {
+  margin-top: 0;
+}
+
+.form-card textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.inline-form input,
+.inline-form select {
+  width: auto;
+  flex: 1;
+  min-width: 130px;
+}
+
+/* The ledger-entry date sits alone on the wrapped row; don't let it stretch —
+   size it to its content so it stays a compact date field. */
+.ledger-form .inline-form input[type='date'] {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+/* Add ledger entry form: inputs row + actions row (upload left, Add right) */
+.ledger-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ledger-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Edit + Delete buttons in a ledger-history row */
+.row-actions {
+  display: flex;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.upload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  max-width: 240px;
+  padding: 8px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: #fafbfe;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.photo-link {
+  margin-left: 8px;
+  margin-right: 0;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Image viewer modal */
+.image-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  max-width: 80vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-modal img {
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* ---------- Auth ---------- */
+.auth-screen {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.auth-card {
+  width: 380px;
+}
+
+.auth-card h1 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+
+.auth-card h2 {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.auth-card .btn {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.alert {
+  background: #fbe0e0;
+  color: var(--danger);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* ---------- License expired screen ---------- */
+.expired-card {
+  width: 460px;
+  max-width: 92vw;
+  text-align: center;
+}
+
+.expired-badge {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  margin: 10px auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 25%, #ff8a8a, #d33a3a 75%);
+  box-shadow: 0 12px 28px rgba(211, 58, 58, 0.35);
+  animation: expiredPulse 2.4s ease-out infinite;
+}
+
+@keyframes expiredPulse {
+  0% { box-shadow: 0 12px 28px rgba(211, 58, 58, 0.35), 0 0 0 0 rgba(211, 58, 58, 0.30); }
+  70% { box-shadow: 0 12px 28px rgba(211, 58, 58, 0.35), 0 0 0 18px rgba(211, 58, 58, 0); }
+  100% { box-shadow: 0 12px 28px rgba(211, 58, 58, 0.35), 0 0 0 0 rgba(211, 58, 58, 0); }
+}
+
+.expired-title {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--danger);
+  margin: 0 0 12px;
+}
+
+.expired-pill {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--danger);
+  background: #fbe3e3;
+  border: 1px solid #f1c4c4;
+  border-radius: 999px;
+  padding: 5px 16px;
+  margin-bottom: 20px;
+}
+
+.expired-note {
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: #fff7f7;
+  border: 1px solid #f1dada;
+  border-left: 3px solid var(--danger);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 0 0 22px;
+}
+
+.expired-card .btn {
+  width: 100%;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+}
+
+.expired-still {
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #fdecec;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 14px 0 0;
+}
+
+.expired-foot {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 16px;
+}
+
+@keyframes expSpin { to { transform: rotate(360deg); } }
+.exp-spin { animation: expSpin 0.8s linear infinite; transform-origin: 50% 50%; }
+
+[data-theme='dark'] .expired-note {
+  background: rgba(211, 58, 58, 0.10);
+  border-color: rgba(211, 58, 58, 0.35);
+  border-left-color: var(--danger);
+}
+[data-theme='dark'] .expired-pill {
+  background: rgba(211, 58, 58, 0.16);
+  border-color: rgba(211, 58, 58, 0.4);
+}
+[data-theme='dark'] .expired-still {
+  background: rgba(211, 58, 58, 0.14);
+}
+
+/* ---------- Detail ---------- */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.panel h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+
+.page > .panel + .panel {
+  margin-top: 16px;
+}
+
+.archive-actions {
+  white-space: nowrap;
+}
+
+.archived-table tbody td {
+  color: var(--muted);
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  row-gap: 8px;
+  margin: 0;
+}
+
+.kv.compact {
+  grid-template-columns: 120px 1fr;
+  row-gap: 5px;
+}
+
+.kv dt {
+  color: var(--muted);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.balance-row.big {
+  font-size: 16px;
+}
+
+.promise-note {
+  margin-top: 14px;
+  background: #fff7e8;
+  border: 1px solid #f0dcb0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.promise-note.overdue {
+  background: #fbe0e0;
+  border-color: #f3c6c6;
+  color: var(--danger);
+}
+
+/* ---------- Notifications ---------- */
+/* Cards flow in a responsive grid so they fill the width instead of leaving a
+   large empty gap in each full-width row. */
+.notif-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  gap: 14px;
+  align-content: start;
+}
+
+.notif-card {
+  background: var(--panel);
+  border: 1px solid #f3c6c6;
+  border-left: 4px solid var(--danger);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+
+.notif-main {
+  flex: 1;
+}
+
+.notif-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.notif-top h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.notif-amount {
+  font-weight: 700;
+  color: var(--danger);
+  margin-bottom: 10px;
+}
+
+/* Action bar sits at the bottom; Call spans the row, the rest split below it. */
+.notif-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.notif-actions .btn {
+  margin-left: 0;
+  text-align: center;
+}
+
+.notif-actions .btn-primary {
+  flex: 1 1 100%;
+}
+
+.notif-actions .btn-ghost {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* ---------- Misc ---------- */
+.empty {
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty.small {
+  padding: 14px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: rgba(15, 22, 40, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 22px;
+  width: 420px;
+}
+
+.modal h3 {
+  margin: 0 0 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+/* ---------- Payment dialog ---------- */
+.pay-modal {
+  width: 460px;
+  max-width: 92vw;
+}
+
+.pay-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #f7f9ff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.pay-summary dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pay-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pay-section {
+  margin-top: 4px;
+}
+
+.pay-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #3a4456;
+}
+
+.pay-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.pay-row .input-group,
+.pay-row input[type='date'] {
+  flex: 1;
+}
+
+.pay-row .btn {
+  white-space: nowrap;
+}
+
+.modal-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 18px 0;
+}
+
+.pay-preview-title {
+  margin: 18px 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+/* The "after update" preview uses a green tint to read as a result, not input */
+.pay-summary.preview {
+  background: #f1faf4;
+  border-color: #cdebd9;
+  margin-bottom: 0;
+}
+
+/* ---------- Toasts ---------- */
+.toast-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  max-width: 380px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  box-shadow: 0 8px 24px rgba(20, 30, 60, 0.14);
+  font-size: 14px;
+  animation: toast-in 0.18s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.toast-msg {
+  flex: 1;
+}
+
+.toast-success {
+  border-left-color: var(--ok);
+}
+.toast-success .toast-icon {
+  background: var(--ok);
+}
+
+.toast-error {
+  border-left-color: var(--danger);
+}
+.toast-error .toast-icon {
+  background: var(--danger);
+}
+
+.toast-info {
+  border-left-color: var(--primary);
+}
+.toast-info .toast-icon {
+  background: var(--primary);
+}
+
+/* ---------- Settings: DB browser ---------- */
+.db-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.db-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.db-tab:hover {
+  background: #f5f7fc;
+}
+
+.db-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.db-tab .db-tab-count {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.db-pk {
+  margin-left: 5px;
+  font-size: 10px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.db-null {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.db-pager {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.db-pager .muted {
+  margin-right: auto;
+}
+
+/* ============================================================
+   Dark theme — overrides applied when <html data-theme="dark">
+   ============================================================ */
+[data-theme='dark'] {
+  --bg: #0e1320;
+  --panel: #161d2c;
+  --ink: #e6eaf2;
+  --muted: #95a2b6;
+  --line: #2a3344;
+  --primary: #5b7cf0;
+  --primary-ink: #ffffff;
+  --danger: #ef5e5e;
+  --ok: #36c98a;
+  --warn: #e0a93f;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  /* Make native controls (date picker, select arrow, scrollbars) render dark */
+  color-scheme: dark;
+}
+
+/* Inputs */
+[data-theme='dark'] input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea {
+  background: #0f1726;
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme='dark'] input:hover,
+[data-theme='dark'] select:hover,
+[data-theme='dark'] textarea:hover {
+  border-color: #3a465d;
+}
+[data-theme='dark'] input:focus,
+[data-theme='dark'] select:focus,
+[data-theme='dark'] textarea:focus {
+  background: #131d30;
+}
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder {
+  color: #6b7790;
+}
+[data-theme='dark'] .input-prefix {
+  background: #1b2536;
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+/* Buttons */
+[data-theme='dark'] .btn-ghost {
+  background: #1d2636;
+  border-color: var(--line);
+  color: var(--ink);
+}
+[data-theme='dark'] .btn-ghost:hover {
+  background: #263247;
+  border-color: #3a465d;
+}
+[data-theme='dark'] .btn-recheck {
+  background: rgba(91, 124, 240, 0.16);
+  border-color: rgba(91, 124, 240, 0.4);
+  color: #aab8f7;
+}
+[data-theme='dark'] .btn-recheck:hover:not(:disabled) {
+  background: rgba(91, 124, 240, 0.26);
+}
+
+/* Tables */
+[data-theme='dark'] .table th {
+  background: #1b2536;
+}
+[data-theme='dark'] .row-click:hover {
+  background: #1e2839;
+}
+
+/* Modals, toasts, menus */
+[data-theme='dark'] .modal,
+[data-theme='dark'] .toast,
+[data-theme='dark'] .action-menu {
+  background: var(--panel);
+}
+[data-theme='dark'] .action-item {
+  color: var(--ink);
+}
+[data-theme='dark'] .action-item:hover {
+  background: #222d40;
+}
+[data-theme='dark'] .action-item.danger:hover {
+  background: rgba(239, 94, 94, 0.14);
+}
+
+/* Form labels */
+[data-theme='dark'] .form-card label,
+[data-theme='dark'] .pay-section label {
+  color: #b7c1d4;
+}
+
+/* Payment dialog summaries */
+[data-theme='dark'] .pay-summary {
+  background: #111a2b;
+  border-color: var(--line);
+}
+[data-theme='dark'] .pay-summary.preview {
+  background: #10211a;
+  border-color: #22402f;
+}
+
+/* Alerts */
+[data-theme='dark'] .alert {
+  background: rgba(239, 94, 94, 0.14);
+  color: #f6a9a9;
+}
+
+/* Status pills — soften the tinted backgrounds for dark */
+[data-theme='dark'] .pill.ok {
+  background: rgba(54, 201, 138, 0.16);
+}
+[data-theme='dark'] .pill.warn {
+  background: rgba(224, 169, 63, 0.16);
+}
+[data-theme='dark'] .pill.danger {
+  background: rgba(239, 94, 94, 0.16);
+}
+
+/* Promise notes */
+[data-theme='dark'] .promise-note {
+  background: rgba(224, 169, 63, 0.12);
+  border-color: rgba(224, 169, 63, 0.3);
+}
+[data-theme='dark'] .promise-note.overdue {
+  background: rgba(239, 94, 94, 0.12);
+  border-color: rgba(239, 94, 94, 0.3);
+}
+
+/* Notification cards */
+[data-theme='dark'] .notif-card {
+  border-color: rgba(239, 94, 94, 0.3);
+}
+
+/* Settings DB tabs */
+[data-theme='dark'] .db-tab {
+  background: #1b2536;
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme='dark'] .db-tab:hover {
+  background: #222d40;
+}
+[data-theme='dark'] .db-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ============================================================
+   Print / Save-as-PDF (A4) — Dashboard report
+   ============================================================ */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Shown only on paper (hidden on screen). */
+.print-only {
+  display: none;
+}
+.print-meta {
+  margin: 2px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media print {
+  /* A4 sheet with comfortable margins. */
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  /* Always print as a clean light report, even in dark mode. */
+  :root,
+  [data-theme='dark'] {
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --ink: #000000;
+    --muted: #444444;
+    --line: #cccccc;
+    color-scheme: light;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    height: auto !important;
+  }
+
+  /* Hide app chrome and on-screen-only controls. */
+  .sidebar,
+  .no-print,
+  .icon-btn,
+  .table-toolbar,
+  .section-header .link {
+    display: none !important;
+  }
+  /* Keep the panels readable on paper (the detail-grid Details/Balance cards). */
+  .panel {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .print-only {
+    display: block !important;
+  }
+
+  /* Drop the fixed-height / scroll containers so ALL rows flow across the pages
+     instead of being clipped to one screen (the on-screen layout caps these at
+     100vh / 72vh with internal scrollbars). */
+  .layout {
+    display: block;
+    height: auto !important;
+  }
+  .content,
+  .content-body {
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .page {
+    padding: 0;
+  }
+
+  /* Tables: show everything, no inner scroll, keep rows intact across pages. */
+  .table-wrap {
+    overflow: visible !important;
+    border: 0;
+    max-height: none !important;
+  }
+  /* Sticky headers overlap oddly on paper; let them repeat per page instead. */
+  .table-wrap > .table thead th {
+    position: static;
+  }
+  table.table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead {
+    display: table-header-group; /* repeat header on each printed page */
+  }
+
+  /* Header row: white background with black bold text (override the dark-theme
+     navy header). Cells: keep every value on a single line; shrink the font and
+     padding so all columns still fit across the A4 width. */
+  .table th {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid #000000 !important;
+  }
+  .table th,
+  .table td {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    color: #000000 !important;
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  tr,
+  .stat-card {
+    break-inside: avoid;
+  }
+
+  /* Force all five stat cards onto a single line (override the responsive
+     2-/3-column breakpoints that trigger at the narrower A4 page width) and
+     shrink them so they fit across the sheet. */
+  .stats-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px;
+  }
+  .stat-card {
+    box-shadow: none;
+    padding: 7px 8px;
+    gap: 7px;
+  }
+  .stat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+  .stat-label {
+    font-size: 9px;
+  }
+  .stat-value {
+    font-size: 13px;
+  }
+
+  /* Keep accent colours (pills, badges, stat bars) when printing. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
