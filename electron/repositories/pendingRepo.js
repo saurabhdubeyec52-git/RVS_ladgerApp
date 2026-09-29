@@ -11,8 +11,24 @@ export function setPromise({ userId, amount, promisedDate }) {
   const value = parsePositiveAmount(amount, 'Pending amount must be greater than 0')
 
   const db = getDb()
-  // Transactionally settle any existing open promise and insert the new one.
-  const tx = db.transaction((userId, value, promisedDate) => {
+  // Check the live ledger balance and replace the open promise atomically so a
+  // stale renderer value cannot create a promise below the amount still owed.
+  const tx = db.transaction(() => {
+    const balance = db
+      .prepare(
+        `SELECT COALESCE(SUM(CASE WHEN type = 'debit' THEN amount ELSE -amount END), 0) AS outstanding
+         FROM transactions
+         WHERE user_id = ? AND archived_at IS NULL`
+      )
+      .get(userId).outstanding
+    const outstandingCents = Math.round(Math.max(0, Number(balance)) * 100)
+    const promiseCents = Math.round(value * 100)
+    if (promiseCents < outstandingCents) {
+      throw new Error(
+        'Promise amount cannot be less than the current outstanding balance. Record a credit payment first to promise the reduced balance.'
+      )
+    }
+
     db.prepare(
       `UPDATE pending_payments
        SET status = 'paid', settled_at = datetime('now')
@@ -24,11 +40,10 @@ export function setPromise({ userId, amount, promisedDate }) {
          VALUES (?, ?, ?, 'pending')`
       )
       .run(userId, value, promisedDate)
+    recordPromiseHistory({ pendingId: info.lastInsertRowid, userId, oldAmount: null, newAmount: value, oldDate: null, newDate: promisedDate, action: 'created' })
     return info.lastInsertRowid
   })
-  const newId = tx(userId, value, promisedDate)
-  // Record history for the created promise.
-  recordPromiseHistory({ pendingId: newId, userId, oldAmount: null, newAmount: value, oldDate: null, newDate: promisedDate, action: 'created' })
+  tx()
   return { ok: true }
 }
 
@@ -180,6 +195,18 @@ export function getPromiseHistory(userId) {
        ORDER BY changed_at ASC`
     )
     .all(userId)
+}
+
+/** Delete one history entry without changing the customer's current promise. */
+export function deletePromiseHistory(id) {
+  const historyId = Number(id)
+  if (!Number.isSafeInteger(historyId) || historyId <= 0) {
+    throw new Error('Invalid promise history entry')
+  }
+
+  const result = getDb().prepare('DELETE FROM promise_history WHERE id = ?').run(historyId)
+  if (result.changes === 0) throw new Error('Promise history entry not found')
+  return { id: historyId }
 }
 
 /** All future (pending, not yet due) promises joined with full customer details. */

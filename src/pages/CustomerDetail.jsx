@@ -54,6 +54,7 @@ export default function CustomerDetail() {
   const [promiseAmount, setPromiseAmount] = useState('')
   const [promiseDate, setPromiseDate] = useState('')
   const [showHistory, setShowHistory] = useState(false)
+  const promiseBelowOutstanding = Number(promiseAmount) * 100 < Math.round(Number(user?.outstanding || 0) * 100)
 
   const load = useCallback(async () => {
     try {
@@ -143,6 +144,12 @@ export default function CustomerDetail() {
     } catch (err) {
       setError(err.message)
     }
+  }
+
+  async function deletePromiseHistory(historyId) {
+    await api.pending.removeHistory(historyId)
+    await load()
+    toast.success(t('toastPromiseHistoryDeleted'))
   }
 
   async function removeTx(txId) {
@@ -323,7 +330,9 @@ export default function CustomerDetail() {
               <input
                 type="number"
                 step="0.01"
-                min="0"
+                min={user.outstanding}
+                aria-describedby="promise-amount-hint"
+                aria-invalid={promiseBelowOutstanding}
                 placeholder={t('pendingAmountField')}
                 value={promiseAmount}
                 onChange={(e) => setPromiseAmount(e.target.value)}
@@ -335,8 +344,17 @@ export default function CustomerDetail() {
                 onChange={(e) => setPromiseDate(e.target.value)}
                 required
               />
+              <div
+                id="promise-amount-hint"
+                className={'promise-validation' + (promiseBelowOutstanding ? ' invalid' : '')}
+                role={promiseBelowOutstanding ? 'alert' : undefined}
+              >
+                {t('promiseMinimumHint', { amount: formatMoney(user.outstanding) })}
+              </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-primary">{t('savePromise')}</button>
+                <button className="btn btn-primary" disabled={promiseBelowOutstanding}>
+                  {t('savePromise')}
+                </button>
                 <button type="button" className="btn btn-ghost" onClick={() => setShowHistory(true)}>
                   {t('viewPromiseHistory') || 'View promise history'}
                 </button>
@@ -347,7 +365,12 @@ export default function CustomerDetail() {
           )}
 
           {/* History is shown in a modal on demand to avoid inline clutter */}
-          <PromiseHistoryModal open={showHistory} onClose={() => setShowHistory(false)} rows={promiseHistory} />
+          <PromiseHistoryModal
+            open={showHistory}
+            onClose={() => setShowHistory(false)}
+            rows={promiseHistory}
+            onDelete={deletePromiseHistory}
+          />
         </div>
       </div>
 

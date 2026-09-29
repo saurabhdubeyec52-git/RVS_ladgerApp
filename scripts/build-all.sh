@@ -9,8 +9,7 @@
 #                  RVS-Ledger-<ver>-x64-portable.zip   (Windows, unzip & run .exe)
 #
 # The whole release/ folder is wiped first. The Windows artifacts are built via
-# scripts/build-win.sh (swaps in the prebuilt Windows better-sqlite3 binary, then
-# restores the macOS one). See README for the one-time wine setup on Apple Silicon.
+# scripts/build-win.sh. See README for the one-time wine setup on Apple Silicon.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

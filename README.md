@@ -29,29 +29,20 @@ credit/debit ledger, record promised payment dates for pending balances, and get
 
 ## Requirements
 
-- Node.js 18+ (tested on Node 20)
+- Node.js 22.12+
 - macOS / Windows / Linux
 
 ### Runtime support
 
-The app ships on **Electron 22** so the Windows builds run on **Windows 7, 8,
-8.1, 10 and 11** (both 64-bit and 32-bit). Electron 22 is past end-of-life, so it
-no longer receives Chromium security updates — this is a deliberate trade-off to
-keep Windows 7 support. If you ever drop Windows 7/8, bump `electron` to a current
-release (≥ 28) and `better-sqlite3` back to latest for ongoing security fixes.
+The app uses **Electron 44** and supports **Windows 10 and 11 (64-bit)**. Windows
+7/8/8.1 and 32-bit Windows are no longer supported by current Electron releases.
+This upgrade keeps Chromium and Electron security fixes current.
 
 ## Setup
 
 ```bash
-npm install      # installs deps and rebuilds better-sqlite3 for Electron
+npm install      # installs app dependencies and bundled SQLite Node-API binaries
 npm run dev      # launch in development with hot reload
-```
-
-If the native module ever mismatches Electron's ABI (e.g. after upgrading
-Electron), run:
-
-```bash
-npm run rebuild
 ```
 
 ## Build a distributable
@@ -71,14 +62,11 @@ the portable apps and sorts them into a tidy layout:
 release/
   installer/   RVS-Ledger-<ver>-arm64.dmg              macOS installer
                RVS-Ledger-Setup-<ver>-x64.exe          Windows 64-bit installer
-               RVS-Ledger-Setup-<ver>-ia32.exe         Windows 32-bit installer
   runable/     RVS-Ledger-<ver>-arm64-portable.zip     macOS  — unzip & run RVS Ledger.app
                RVS-Ledger-<ver>-x64-portable.zip       Windows 64-bit — unzip & run RVS Ledger.exe
-               RVS-Ledger-<ver>-ia32-portable.zip      Windows 32-bit — unzip & run RVS Ledger.exe
 ```
 
-Windows artifacts are built for **x64 and ia32 (32-bit)** so they cover Windows 7
-through 11 on either architecture.
+Windows artifacts are built for **x64** on Windows 10/11.
 
 ### Portable (no-install) builds — run from a zip
 
@@ -87,7 +75,7 @@ directly — no installer, no admin rights. Output goes to `./release`.
 
 ```bash
 npm run portable:mac   # -> release/runable/RVS-Ledger-<ver>-arm64-portable.zip
-npm run portable:win   # -> release/runable/RVS-Ledger-<ver>-{x64,ia32}-portable.zip
+npm run portable:win   # -> release/runable/RVS-Ledger-<ver>-x64-portable.zip
 npm run portable       # both of the above
 ```
 
@@ -99,16 +87,15 @@ npm run portable       # both of the above
   (Unsigned, so Windows SmartScreen may warn: **More info → Run anyway**.)
 
 > There is **no single cross-OS zip**: an Electron app bundles a platform-native
-> runtime and the native `better-sqlite3` binary, so macOS and Windows each get
-> their own zip. Building the Windows zip from macOS uses the same prebuilt
-> Windows binary + `wine` flow described below.
+> runtime and `better-sqlite3`'s platform-specific Node-API binary, so macOS and
+> Windows each get their own zip. Building the Windows zip from macOS uses the
+> `wine` flow described below; no native compilation or binary swapping is needed.
 
 ### Build a Windows installer on macOS
 
-`better-sqlite3` is a native module and cannot be cross-compiled from a Mac, so
-`npm run build:win` (via `scripts/build-win.sh`) downloads better-sqlite3's
-prebuilt **Windows** binary, packages it with `npmRebuild` disabled, then
-restores the local macOS binary so `npm run dev` keeps working.
+`npm run build:win` (via `scripts/build-win.sh`) can package the prebuilt Windows
+application from macOS because `better-sqlite3` includes platform-specific
+Node-API binaries and electron-builder's native rebuild is disabled.
 
 One-time setup on Apple Silicon — electron-builder uses `wine` to stamp the
 `.exe` icon/version:

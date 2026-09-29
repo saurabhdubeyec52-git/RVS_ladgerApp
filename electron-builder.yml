@@ -3,6 +3,7 @@ productName: RVS_Ledger
 directories:
   output: release
   buildResources: build
+npmRebuild: false
 files:
   - out/**/*
   - package.json
@@ -38,7 +39,6 @@ win:
     - target: nsis
       arch:
         - x64
-        - ia32
 nsis:
   oneClick: false
   perMachine: false

@@ -37,6 +37,7 @@ contextBridge.exposeInMainWorld('api', {
     set: (payload) => invoke('pending:set', payload),
     open: (userId) => invoke('pending:open', userId),
     history: (userId) => invoke('pending:history', userId),
+    removeHistory: (id) => invoke('pending:history:delete', id),
     markPaid: (id) => invoke('pending:markPaid', id),
     recordPayment: (payload) => invoke('pending:recordPayment', payload),
     reschedule: (payload) => invoke('pending:reschedule', payload),

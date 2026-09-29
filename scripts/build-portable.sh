@@ -6,11 +6,10 @@
 #   - Windows: RVS-Ledger-<ver>-x64-portable.zip      → unzip, run "RVS Ledger.exe"
 #
 # There is no single cross-OS zip: an Electron app bundles a platform-specific
-# runtime and the native better-sqlite3 binary, so each OS needs its own zip.
+# runtime and better-sqlite3 Node-API binary, so each OS needs its own zip.
 #
-# The Windows zip reuses scripts/build-win.sh (swaps in the prebuilt Windows
-# better-sqlite3 binary, then restores the macOS one). See README for the
-# one-time wine setup on Apple Silicon.
+# The Windows zip reuses scripts/build-win.sh. See README for the one-time wine
+# setup on Apple Silicon.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

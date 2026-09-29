@@ -21,6 +21,11 @@ export default defineConfig({
   },
   renderer: {
     root: '.',
+    server: {
+      watch: {
+        ignored: ['**/release/**', '**/out/**', '**/node_modules/**', '**/.git/**']
+      }
+    },
     build: {
       rollupOptions: {
         input: { index: resolve(__dirname, 'index.html') }

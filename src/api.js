@@ -56,6 +56,7 @@ export const api = {
     set: (payload) => unwrap(raw.pending.set(payload)),
     open: (userId) => unwrap(raw.pending.open(userId)),
     history: (userId) => unwrap(raw.pending.history(userId)),
+    removeHistory: (id) => unwrap(raw.pending.removeHistory(id)),
     markPaid: (id) => unwrap(raw.pending.markPaid(id)),
     recordPayment: (payload) => unwrap(raw.pending.recordPayment(payload)),
     reschedule: (payload) => unwrap(raw.pending.reschedule(payload)),

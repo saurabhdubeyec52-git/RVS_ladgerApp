@@ -119,6 +119,7 @@ export function registerIpc(getMainWindow) {
   handle('pending:set', (payload) => pendingRepo.setPromise(payload))
   handle('pending:open', (userId) => pendingRepo.getOpenPromise(userId))
   handle('pending:history', (userId) => pendingRepo.getPromiseHistory(userId))
+  handle('pending:history:delete', (id) => pendingRepo.deletePromiseHistory(id))
   handle('pending:markPaid', (id) => pendingRepo.markPaid(id))
   handle('pending:recordPayment', ({ id, amount }) => {
     const promise = pendingRepo.getPromiseById(id)

@@ -1,7 +1,12 @@
-import React from 'react'
+import { useState } from 'react'
 import { formatMoney } from '../api.js'
+import { useLang } from '../i18n.jsx'
 
-export default function PromiseHistoryModal({ open, onClose, rows }) {
+export default function PromiseHistoryModal({ open, onClose, rows, onDelete }) {
+  const { t } = useLang()
+  const [deletingId, setDeletingId] = useState(null)
+  const [error, setError] = useState('')
+
   if (!open) return null
   const overlayStyle = {
     position: 'fixed',
@@ -33,13 +38,29 @@ export default function PromiseHistoryModal({ open, onClose, rows }) {
     return `${day}-${month}-${year}`
   }
 
+  async function deleteHistoryRow(row) {
+    if (!window.confirm(t('deletePromiseHistoryConfirm'))) return
+
+    setDeletingId(row.id)
+    setError('')
+    try {
+      await onDelete(row.id)
+    } catch (err) {
+      setError(err.message || String(err))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={panelStyle} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0 }}>Promise history</h3>
-          <button className="btn btn-ghost" onClick={onClose}>Close</button>
+          <h3 style={{ margin: 0 }}>{t('promiseHistory')}</h3>
+          <button className="btn btn-ghost" onClick={onClose}>{t('closeLabel')}</button>
         </div>
+
+        {error && <div className="alert" role="alert">{error}</div>}
 
         <table className="table" style={{ marginTop: 12 }}>
           <thead>
@@ -67,12 +88,12 @@ export default function PromiseHistoryModal({ open, onClose, rows }) {
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          if (window.confirm(t('deleteConfirm')))
-                            raw.pending.remove(r.id)
+                          deleteHistoryRow(r)
                         }}
                         className="btn-danger"
+                        disabled={deletingId !== null}
                       >
-                        Delete
+                        {deletingId === r.id ? t('deleting') : t('delete')}
                       </button>
                     </td>
                   </tr>
@@ -80,7 +101,7 @@ export default function PromiseHistoryModal({ open, onClose, rows }) {
               })
             ) : (
               <tr>
-                <td colSpan={5} className="empty small">No history</td>
+                <td colSpan={5} className="empty small">{t('noPromiseHistory')}</td>
               </tr>
             )}
           </tbody>

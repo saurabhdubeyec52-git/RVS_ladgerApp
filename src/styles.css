@@ -930,6 +930,16 @@ textarea:focus {
   min-width: 130px;
 }
 
+.promise-validation {
+  flex: 1 0 100%;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.promise-validation.invalid {
+  color: var(--danger);
+}
+
 /* The ledger-entry date sits alone on the wrapped row; don't let it stretch —
    size it to its content so it stays a compact date field. */
 .ledger-form .inline-form input[type='date'] {
