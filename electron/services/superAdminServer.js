@@ -1,8 +1,20 @@
 import http from 'http'
 import crypto from 'crypto'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import { pipeline } from 'stream/promises'
+import { BrowserWindow } from 'electron'
 import * as superAdminRepo from '../repositories/superAdminRepo.js'
 import * as licenseRepo from '../repositories/licenseRepo.js'
 import * as authRepo from '../repositories/authRepo.js'
+import {
+  createAutomaticBackupPath,
+  createBackupFile,
+  createTemporaryBackupPath,
+  restoreBackupFile,
+  saveUploadedBackup
+} from './dataBackupService.js'
 
 // Embedded localhost-only panel the vendor opens in a browser to manage the
 // app's expiry date. Bound to 127.0.0.1 so it is never exposed on the network.
@@ -119,6 +131,43 @@ async function handleRequest(req, res) {
       if (method === 'GET' && path === '/api/status') {
         return sendJson(res, 200, { ...licenseRepo.getStatus(), username: session.username })
       }
+      if (method === 'GET' && path === '/api/backup') {
+        const backupPath = createTemporaryBackupPath()
+        try {
+          const backup = await createBackupFile(backupPath)
+          const date = backup.createdAt.slice(0, 10)
+          res.writeHead(200, {
+            'Content-Type': 'application/zip',
+            'Content-Length': backup.size,
+            'Content-Disposition': `attachment; filename="rvs-ledger-backup-${date}.rvsbackup"`,
+            'Cache-Control': 'no-store'
+          })
+          await pipeline(fs.createReadStream(backupPath), res)
+          return
+        } finally {
+          await fs.promises.rm(backupPath, { force: true }).catch(() => {})
+        }
+      }
+      if (method === 'POST' && path === '/api/backup/restore') {
+        const uploadPath = createTemporaryBackupPath()
+        const safetyBackupPath = createAutomaticBackupPath()
+        try {
+          await saveUploadedBackup(req, uploadPath)
+          const result = await restoreBackupFile(uploadPath, () =>
+            createBackupFile(safetyBackupPath)
+          )
+          for (const window of BrowserWindow.getAllWindows()) {
+            if (!window.isDestroyed()) window.webContents.send('data:changed')
+          }
+          return sendJson(res, 200, {
+            ok: true,
+            counts: result.counts,
+            safetyBackup: safetyBackupPath
+          })
+        } finally {
+          await fs.promises.rm(uploadPath, { force: true }).catch(() => {})
+        }
+      }
       // Client app account (the single admin who logs into the desktop app).
       if (method === 'GET' && path === '/api/client') {
         return sendJson(res, 200, { ...authRepo.getInfo(), license: licenseRepo.getStatus() })
@@ -153,6 +202,10 @@ async function handleRequest(req, res) {
         return sendJson(res, 200, { ok: true })
       }
     } catch (err) {
+      if (res.headersSent) {
+        res.destroy(err)
+        return
+      }
       return sendJson(res, 400, { error: err.message })
     }
 
@@ -268,6 +321,7 @@ const PAGE = `<!doctype html>
     color:#fff; font-size:14px; font-weight:600; transition:background .15s, opacity .15s, transform .05s; }
   button:hover { background:var(--accent2); }
   button:active { transform:translateY(1px); }
+  button:disabled { opacity:.65; cursor:wait; transform:none; }
   button.ghost { background:transparent; border:1px solid var(--line); color:var(--text); }
   button.ghost:hover { background:rgba(255,255,255,.05); }
   button.danger { background:transparent; border:1px solid rgba(239,68,68,.5); color:#fca5a5; }
@@ -295,6 +349,32 @@ const PAGE = `<!doctype html>
   .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
   .card .desc { color:var(--muted); font-size:12.5px; margin:6px 0 0; }
   .card .actions { margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
+  .backup-card { grid-column:1 / -1; }
+  .backup-card .desc { max-width:720px; line-height:1.55; }
+  .backup-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .backup-note { display:flex; align-items:flex-start; gap:10px; margin-top:18px; padding:12px 14px;
+    border:1px solid rgba(245,158,11,.28); border-radius:10px; background:rgba(245,158,11,.08);
+    color:#fcd34d; font-size:12.5px; line-height:1.55; }
+  .backup-note-icon { flex:0 0 auto; }
+  .backup-note-text { min-width:0; overflow-wrap:anywhere; }
+  .backup-note code { color:#fde68a; font:inherit; font-weight:700; }
+  .backup-result { margin-top:12px; color:#86efac; font-size:12.5px; line-height:1.5; overflow-wrap:anywhere; }
+  .backup-progress { margin-top:18px; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--card2); }
+  .backup-progress[hidden] { display:none; }
+  .backup-progress-head { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:13px; }
+  .backup-progress-head strong { color:var(--text); }
+  .backup-progress-head span { color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .progress-track { height:9px; margin-top:11px; overflow:hidden; border-radius:999px; background:#26334b; }
+  .progress-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--accent),#22d3ee); transition:width .15s ease; }
+  .progress-fill.indeterminate { width:38%; animation:backup-progress-slide 1.1s ease-in-out infinite alternate; }
+  @keyframes backup-progress-slide { from { transform:translateX(-20%); } to { transform:translateX(190%); } }
+  .backup-progress-meta { display:flex; justify-content:space-between; gap:12px; margin-top:8px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+  @media (max-width:520px) {
+    .backup-actions { align-items:stretch; flex-direction:column; }
+    .backup-actions button { width:100%; }
+    .backup-note { font-size:12px; }
+    .backup-progress-meta { flex-direction:column; gap:4px; }
+  }
 
   .kv { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px; }
   .kv:last-child { border-bottom:0; }
@@ -405,6 +485,34 @@ const PAGE = `<!doctype html>
             <button class="ghost" onclick="changePw()">Update password</button>
           </div>
         </div>
+
+        <div class="card backup-card">
+          <h2>💾 Database backup &amp; restore</h2>
+          <p class="desc">Move or safeguard customer records, ledger entries, payment promises, history and transaction photos in a single backup file. Your device’s admin accounts and license settings are not included.</p>
+          <div class="backup-actions">
+            <button id="exportBackupButton" onclick="exportBackup()">⬇ Download backup</button>
+            <button id="restoreBackupButton" class="ghost" onclick="$('backupFile').click()">↥ Restore from backup</button>
+            <input id="backupFile" type="file" accept=".rvsbackup,.zip,application/zip" hidden onchange="restoreBackup()" />
+          </div>
+          <div class="backup-note" role="note">
+            <span class="backup-note-icon" aria-hidden="true">⚠️</span>
+            <span class="backup-note-text"><strong>Before restoring:</strong> this replaces the current customers, transactions, promises and photos on this device. A safety backup is created automatically in the app-data <code>backups</code> folder. Admin accounts and license settings stay unchanged.</span>
+          </div>
+          <div id="backupProgress" class="backup-progress" role="region" aria-label="Backup transfer progress" hidden>
+            <div class="backup-progress-head">
+              <strong id="backupProgressLabel">Preparing…</strong>
+              <span id="backupProgressPercent">0%</span>
+            </div>
+            <div id="backupProgressTrack" class="progress-track" role="progressbar" aria-label="Backup transfer" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="backupProgressFill" class="progress-fill"></div>
+            </div>
+            <div class="backup-progress-meta">
+              <span id="backupProgressBytes">0 B transferred</span>
+              <span id="backupProgressRemaining">Calculating remaining size…</span>
+            </div>
+          </div>
+          <div id="backupResult" class="backup-result" role="status" aria-live="polite"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -423,6 +531,42 @@ const PAGE = `<!doctype html>
   function flash(el, text, ok) {
     el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'err')
     if (ok) setTimeout(() => { el.className = 'msg' }, 2500)
+  }
+  function formatBytes(value) {
+    if (!Number.isFinite(value) || value < 0) return '—'
+    if (value < 1024) return value + ' B'
+    const units = ['KB', 'MB', 'GB']
+    let size = value / 1024
+    let unit = units[0]
+    for (let i = 1; size >= 1024 && i < units.length; i++) { size /= 1024; unit = units[i] }
+    return size.toFixed(size < 10 ? 1 : 0) + ' ' + unit
+  }
+  function updateBackupProgress(label, loaded, total, indeterminate) {
+    const panel = $('backupProgress')
+    const fill = $('backupProgressFill')
+    const percentEl = $('backupProgressPercent')
+    const track = $('backupProgressTrack')
+    panel.hidden = false
+    $('backupProgressLabel').textContent = label
+    if (indeterminate || !Number.isFinite(total) || total <= 0) {
+      fill.classList.add('indeterminate')
+      fill.style.width = ''
+      percentEl.textContent = '…'
+      track.removeAttribute('aria-valuenow')
+      $('backupProgressBytes').textContent = formatBytes(loaded || 0) + ' processed'
+      $('backupProgressRemaining').textContent = 'Remaining size unavailable'
+      return
+    }
+    fill.classList.remove('indeterminate')
+    const percent = Math.min(100, Math.floor((loaded / total) * 100))
+    fill.style.width = percent + '%'
+    percentEl.textContent = percent + '%'
+    track.setAttribute('aria-valuenow', String(percent))
+    $('backupProgressBytes').textContent = formatBytes(loaded) + ' of ' + formatBytes(total)
+    $('backupProgressRemaining').textContent = formatBytes(Math.max(0, total - loaded)) + ' remaining'
+  }
+  function hideBackupProgress() {
+    $('backupProgress').hidden = true
   }
   async function api(path, method, body) {
     const res = await fetch(path, {
@@ -507,6 +651,101 @@ const PAGE = `<!doctype html>
       await api('/api/password', 'POST', { oldPassword: $('oldp').value, newPassword: $('newp').value })
       $('oldp').value = ''; $('newp').value = ''; toast('Super-admin password updated', true)
     } catch (e) { toast(e.message, false) }
+  }
+  async function exportBackup() {
+    const button = $('exportBackupButton')
+    button.disabled = true
+    button.textContent = 'Preparing backup…'
+    $('backupResult').textContent = ''
+    updateBackupProgress('Preparing backup file…', 0, 0, true)
+    try {
+      const { blob, filename } = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', '/api/backup')
+        xhr.responseType = 'blob'
+        xhr.onprogress = (event) => {
+          const total = event.lengthComputable ? event.total : Number(xhr.getResponseHeader('Content-Length'))
+          updateBackupProgress('Downloading backup…', event.loaded, total, !total)
+        }
+        xhr.onerror = () => reject(new Error('Network error while downloading backup.'))
+        xhr.onload = async () => {
+          if (xhr.status < 200 || xhr.status >= 300) {
+            let message = 'Could not create backup'
+            try { message = JSON.parse(await xhr.response.text()).error || message } catch {}
+            reject(new Error(message))
+            return
+          }
+          const disposition = xhr.getResponseHeader('Content-Disposition') || ''
+          const name = disposition.match(/filename="([^"]+)"/)?.[1] || 'rvs-ledger-backup.rvsbackup'
+          resolve({ blob: xhr.response, filename: name })
+        }
+        xhr.send()
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      updateBackupProgress('Backup downloaded', blob.size, blob.size, false)
+      $('backupResult').textContent = 'Backup downloaded. Store it somewhere safe.'
+      toast('Backup downloaded', true)
+    } catch (e) {
+      $('backupResult').textContent = e.message
+      hideBackupProgress()
+      toast(e.message, false)
+    } finally {
+      button.disabled = false
+      button.textContent = '⬇ Download backup'
+    }
+  }
+  async function restoreBackup() {
+    const input = $('backupFile')
+    const file = input.files && input.files[0]
+    if (!file) return
+    const confirmed = confirm('Restore this backup? This replaces all customers, transactions, promises, history and photos on this device. Admin logins and license settings are kept. A safety backup is created first.')
+    if (!confirmed) { input.value = ''; return }
+    const button = $('restoreBackupButton')
+    button.disabled = true
+    button.textContent = 'Restoring backup…'
+    $('backupResult').textContent = ''
+    updateBackupProgress('Uploading backup…', 0, file.size, false)
+    try {
+      const data = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', '/api/backup/restore')
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream')
+        xhr.upload.onprogress = (event) => {
+          const total = event.lengthComputable ? event.total : file.size
+          updateBackupProgress('Uploading backup…', event.loaded, total, !total)
+          if (event.lengthComputable && event.loaded >= event.total) {
+            updateBackupProgress('Upload complete — validating and restoring…', event.loaded, event.total, true)
+          }
+        }
+        xhr.onerror = () => reject(new Error('Network error while uploading backup.'))
+        xhr.onload = () => {
+          let result = {}
+          try { result = JSON.parse(xhr.responseText) } catch {}
+          if (xhr.status < 200 || xhr.status >= 300) reject(new Error(result.error || 'Could not restore backup'))
+          else resolve(result)
+        }
+        xhr.send(file)
+      })
+      updateBackupProgress('Restore complete', file.size, file.size, false)
+      $('backupResult').textContent = 'Restore complete. Safety copy saved at: ' + data.safetyBackup
+      toast('Data restored successfully', true)
+      refresh()
+    } catch (e) {
+      $('backupResult').textContent = 'Restore failed: ' + e.message
+      hideBackupProgress()
+      toast(e.message, false)
+    } finally {
+      input.value = ''
+      button.disabled = false
+      button.textContent = '↥ Restore from backup'
+    }
   }
   async function logout() {
     try { await api('/api/logout', 'POST', {}) } catch {}

@@ -141,3 +141,7 @@ src/               # React renderer (pages, components, context)
 - **Outstanding** = total debit − total credit. A positive value means the
   customer still owes money. When a credit clears the balance, any open promise
   is automatically marked paid.
+
+
+
+  ==>(window+E)> %APPDATA%\rvs-ledger
